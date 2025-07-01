@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augmented Reality Web App UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for the right text panel */
+        .scrollable-text {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Scrollbar styling for modern browsers */
+        .scrollable-text::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-text::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollable-text::-webkit-scrollbar-thumb {
+            background-color: rgba(100, 116, 139, 0.5);
+            border-radius: 10px;
+        }
+
+        /* Overlay for audio panel top frame */
+        .audio-info-frame {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 10px 15px rgb(0 0 0 / 0.1);
+        }
+
+        /* Container background fade for video frames and info */
+        .frame-glow {
+            box-shadow: 0 0 12px 3px rgba(132, 190, 255, 0.75);
+            border-radius: 0.75rem;
+        }
+
+        /* Hide scrollbar on small screens for horizontal container */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 min-h-screen flex flex-col px-6 py-10 font-sans text-slate-100">
+
+    <div class="flex flex-col md:flex-row md:space-x-10 max-w-7xl mx-auto w-full">
+        <!-- Left section: video with info and small audio frames below -->
+        <div class="flex flex-col md:w-1/2 space-y-6">
+
+            <!-- Large video frame replacing Mona Lisa image -->
+            <div class="relative frame-glow bg-gray-900 w-full rounded-xl overflow-hidden aspect-[4/3]">
+                <video id="mainVideo" class="w-full h-full object-cover" poster="https://placehold.co/600x450/png?text=Artwork+Video+Placeholder"
+                    preload="metadata" controlsList="nodownload" crossorigin="anonymous">
+                    <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm" />
+                    <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+
+                <!-- Custom play/pause buttons outside native controls -->
+                <div
+                    class="absolute bottom-3 right-3 flex items-center space-x-3 bg-black bg-opacity-50 rounded-full px-3 py-1 text-sm backdrop-blur-sm select-none">
+                    <button id="playBtn" aria-label="Play video"
+                        class="text-white hover:text-blue-400 focus:outline-none">Play</button>
+                    <button id="pauseBtn" aria-label="Pause video"
+                        class="text-white hover:text-blue-400 focus:outline-none">Pause</button>
+                </div>
+
+                <!-- Bottom left info box with artist and dates -->
+                <div
+                    class="absolute bottom-3 left-3 bg-gray-800 bg-opacity-90 text-slate-200 min-w-[11rem] rounded-lg flex flex-col space-y-1 p-3 drop-shadow-lg backdrop-blur-sm">
+                    <div class="mb-1 font-semibold text-lg select-none">Leonardo da Vinci</div>
+                    <div class="text-xs">
+                        <div><span class="font-semibold">Estimated date:</span> 1503 to 1519</div>
+                        <div><span class="font-semibold">Where to see it:</span> Louvre Museum (Paris)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two small audio frames side by side -->
+            <div class="flex space-x-6">
+
+                <!-- Audio Frame 1 -->
+                <div
+                    class="relative bg-gray-800 bg-opacity-90 rounded-xl shadow-md flex flex-col items-center justify-center aspect-[4/3] md:aspect-[5/4] w-1/2 p-4 cursor-pointer select-none hover:ring-2 hover:ring-blue-400"
+                    id="audioFrame1" tabindex="0" aria-label="Audio Frame 1: Play audio about artwork details">
+
+                    <!-- Audio icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-blue-400 mb-3" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 19V6l12-2v13M5 9v6" />
+                    </svg>
+
+                    <div class="text-center text-sm font-semibold text-slate-300">Audio 1</div>
+                </div>
+
+                <!-- Audio Frame 2 -->
+                <div
+                    class="relative bg-gray-800 bg-opacity-90 rounded-xl shadow-md flex flex-col items-center justify-center aspect-[4/3] md:aspect-[5/4] w-1/2 p-4 cursor-pointer select-none hover:ring-2 hover:ring-blue-400"
+                    id="audioFrame2" tabindex="0" aria-label="Audio Frame 2: Play audio about artwork history">
+
+                    <!-- Audio icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-blue-400 mb-3" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 19V6l12-2v13M5 9v6" />
+                    </svg>
+
+                    <div class="text-center text-sm font-semibold text-slate-300">Audio 2</div>
+                </div>
+            </div>
+
+            <!-- Audio info overlay container for dynamic audio frame shown on top of text below -->
+            <div id="audioInfoContainer" aria-live="polite" class="mt-6"></div>
+
+        </div>
+
+        <!-- Right section: large scrollable text explaining the object target -->
+        <div
+            class="relative bg-gradient-to-t from-gray-900/90 via-gray-900/75 to-gray-900/90 rounded-xl p-7 shadow-lg md:w-1/2 overflow-hidden flex flex-col max-h-[615px]">
+
+            <h2 class="text-3xl font-bold mb-4 select-none">Object Target Explanation</h2>
+
+            <div id="textPanel"
+                class="scrollable-text text-slate-300 leading-relaxed overflow-y-auto pr-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <p>
+                    It should come as no surprise that the most famous painting in the world is that mysterious woman with the enigmatic smile. But that's one of the few certainties about this work of art.
+                </p>
+                <p class="mt-4">
+                    The sitter in the painting is thought to be Lisa Gherardini, the wife of Florence merchant Francesco del Giocondo, but experts aren't sure. It did represent an innovation in art — the painting is the earliest known Italian portrait to focus so closely on the sitter in a half-length portrait, according to the Louvre, where it was first installed in 1804.
+                </p>
+                <p class="mt-4">
+                    Her gaze seems to follow the viewer and her subtle smile has captivated audiences for centuries. The painting was created by Leonardo da Vinci, a polymath of the Italian Renaissance whose talents spanned art, science, and engineering.
+                </p>
+                <p class="mt-4">
+                    The Mona Lisa's techniques of sfumato—soft blending of colors and tones—enhance the lifelike quality and atmospheric depth of the portrait. Her timeless beauty and mystery continue to inspire admiration and scholarly research to this day.
+                </p>
+                <p class="mt-4">
+                    Displayed in the Louvre Museum in Paris, it attracts millions of visitors every year, making it one of the most viewed and celebrated works of art in history.
+                </p>
+
+            </div>
+
+            <!-- Toggle scroll button -->
+            <button id="toggleScrollBtn" aria-pressed="true" aria-label="Toggle scroll in explanation text"
+                class="absolute top-5 right-5 bg-black bg-opacity-60 hover:bg-opacity-80 text-slate-300 rounded-full px-3 py-1 text-sm select-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                Disable Scroll
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Video play/pause buttons
+        const mainVideo = document.getElementById("mainVideo");
+        const playBtn = document.getElementById("playBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+
+        playBtn.addEventListener("click", () => {
+            mainVideo.play();
+        });
+
+        pauseBtn.addEventListener("click", () => {
+            mainVideo.pause();
+        });
+
+        // Audio frame data
+        const audioContents = {
+            audio1: {
+                src: "https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3",
+                descriptionTitle: "Audio 1 - Artwork Details",
+                descriptionText: "This audio provides an in-depth description of the Mona Lisa artwork, focusing on the artist's techniques, the use of light and shadow, and the symbolism hidden within the painting."
+            },
+            audio2: {
+                src: "https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3",
+                descriptionTitle: "Audio 2 - Artwork History",
+                descriptionText: "This audio covers the history behind the Mona Lisa, including its creation period, the journey of the painting through different owners, and its current location in the Louvre Museum in Paris."
+            }
+        };
+
+        // References for audio frames
+        const audioFrame1 = document.getElementById("audioFrame1");
+        const audioFrame2 = document.getElementById("audioFrame2");
+        const audioInfoContainer = document.getElementById("audioInfoContainer");
+        const textPanel = document.getElementById("textPanel");
+
+        let currentAudio = null;
+
+        // Utility: create the audio info frame overlay with controls and close button
+        function createAudioInfoFrame(audioKey) {
+            const data = audioContents[audioKey];
+            if (!data) return null;
+
+            // Container box
+            const container = document.createElement("div");
+            container.className = "audio-info-frame max-w-xl mx-auto relative mb-6";
+
+            // Audio element
+            const audio = document.createElement("audio");
+            audio.src = data.src;
+            audio.controls = false;
+            audio.preload = "auto";
+            audio.id = "audioInfoPlayer";
+
+            // Play/pause buttons container
+            const controlsDiv = document.createElement("div");
+            controlsDiv.className = "flex items-center justify-between";
+
+            // Title and Progress bar container
+            const titleAndProgress = document.createElement("div");
+            titleAndProgress.className = "flex flex-col flex-grow";
+
+            // Title
+            const title = document.createElement("div");
+            title.textContent = data.descriptionTitle;
+            title.className = "font-semibold text-gray-900 text-lg mb-2";
+
+            // Waveform/Progress bar container
+            const progressContainer = document.createElement("div");
+            progressContainer.className = "relative w-full h-8 bg-gray-300 rounded-full overflow-hidden";
+
+            // Progress bar fill
+            const progressBar = document.createElement("div");
+            progressBar.className = "absolute left-0 top-0 h-8 bg-blue-400 rounded-full";
+            progressBar.style.width = "0%";
+
+            progressContainer.appendChild(progressBar);
+
+            titleAndProgress.appendChild(title);
+            titleAndProgress.appendChild(progressContainer);
+
+            // Buttons container
+            const btnsDiv = document.createElement("div");
+            btnsDiv.className = "flex items-center space-x-4 ml-4";
+
+            // Play button
+            const playBtn = document.createElement("button");
+            playBtn.textContent = "Play";
+            playBtn.className = "text-blue-700 hover:text-blue-900 font-semibold focus:outline-none";
+            playBtn.setAttribute("aria-label", "Play audio");
+
+            // Pause button
+            const pauseBtn = document.createElement("button");
+            pauseBtn.textContent = "Pause";
+            pauseBtn.className = "text-blue-700 hover:text-blue-900 font-semibold focus:outline-none";
+            pauseBtn.setAttribute("aria-label", "Pause audio");
+
+            // Close button (X)
+            const closeBtn = document.createElement("button");
+            closeBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 hover:text-red-600" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-label="Close audio frame">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>`;
+            closeBtn.className = "ml-4 shrink-0 bg-transparent border-none cursor-pointer";
+            closeBtn.title = "Close audio";
+
+            btnsDiv.appendChild(playBtn);
+            btnsDiv.appendChild(pauseBtn);
+            btnsDiv.appendChild(closeBtn);
+
+            controlsDiv.appendChild(titleAndProgress);
+            controlsDiv.appendChild(btnsDiv);
+
+            container.appendChild(audio);
+            container.appendChild(controlsDiv);
+
+            // Description text below audio controls
+            const descPara = document.createElement("p");
+            descPara.textContent = data.descriptionText;
+            descPara.className = "text-gray-700 text-sm mt-3";
+
+            container.appendChild(descPara);
+
+            // Event listeners for play/pause buttons
+            playBtn.addEventListener("click", () => {
+                audio.play();
+            });
+            pauseBtn.addEventListener("click", () => {
+                audio.pause();
+            });
+
+            // Update progress bar as audio plays
+            audio.addEventListener("timeupdate", () => {
+                if (audio.duration > 0) {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = percent + "%";
+                }
+            });
+
+            // Close event removes this frame and resets UI
+            closeBtn.addEventListener("click", () => {
+                closeAudioInfo();
+            });
+
+            // On audio end, reset progress
+            audio.addEventListener("ended", () => {
+                progressBar.style.width = "0%";
+            });
+
+            return container;
+        }
+
+        // Show audio info frame and resize text below
+        function openAudioInfo(audioKey) {
+            // If currentAudio exists with same key, do nothing
+            if (currentAudio === audioKey) return;
+
+            closeAudioInfo(false); // close existing if any, but keep cleanup below
+
+            // Create new info frame
+            const frame = createAudioInfoFrame(audioKey);
+            if (!frame) return;
+
+            audioInfoContainer.appendChild(frame);
+            currentAudio = audioKey;
+
+            // Shrink text panel height by about half
+            textPanel.style.maxHeight = "200px";
+            textPanel.classList.add("transition-all", "duration-500", "ease-in-out");
+        }
+
+        // Remove audio frame and reset text panel size
+        function closeAudioInfo(applyTransition = true) {
+            if (!currentAudio) return;
+
+            // Stop and remove the audio element if playing
+            const audioPlayer = document.getElementById("audioInfoPlayer");
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+            }
+
+            // Clear container
+            audioInfoContainer.innerHTML = "";
+            currentAudio = null;
+
+            // Reset text height max and remove transitions smoothly
+            if (applyTransition) {
+                textPanel.style.maxHeight = "400px";
+                textPanel.classList.remove("transition-all", "duration-500", "ease-in-out");
+            }
+        }
+
+        // Event listeners for audio frames click & keyboard accessibility (Enter/Space)
+        audioFrame1.addEventListener("click", () => openAudioInfo("audio1"));
+        audioFrame2.addEventListener("click", () => openAudioInfo("audio2"));
+
+        // Keyboard accessibility for audio frames
+        audioFrame1.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openAudioInfo("audio1");
+            }
+        });
+        audioFrame2.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openAudioInfo("audio2");
+            }
+        });
+
+        // Toggle scroll button for text panel
+        const toggleScrollBtn = document.getElementById("toggleScrollBtn");
+        toggleScrollBtn.addEventListener("click", () => {
+            if (textPanel.style.overflowY === "auto" || textPanel.style.overflowY === "") {
+                // Disable scroll
+                textPanel.style.overflowY = "hidden";
+                toggleScrollBtn.textContent = "Enable Scroll";
+                toggleScrollBtn.setAttribute("aria-pressed", "false");
+            } else {
+                // Enable scroll
+                textPanel.style.overflowY = "auto";
+                toggleScrollBtn.textContent = "Disable Scroll";
+                toggleScrollBtn.setAttribute("aria-pressed", "true");
+            }
+        });
+
+        // Initialize scroll enabled
+        textPanel.style.overflowY = "auto";
+    </script>
+</body>
+
+</html>
+
