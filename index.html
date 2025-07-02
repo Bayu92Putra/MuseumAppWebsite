@@ -372,24 +372,7 @@
             }
         });
 
-        // Toggle scroll button for text panel
-        const toggleScrollBtn = document.getElementById("toggleScrollBtn");
-        toggleScrollBtn.addEventListener("click", () => {
-            if (textPanel.style.overflowY === "auto" || textPanel.style.overflowY === "") {
-                // Disable scroll
-                textPanel.style.overflowY = "hidden";
-                toggleScrollBtn.textContent = "Enable Scroll";
-                toggleScrollBtn.setAttribute("aria-pressed", "false");
-            } else {
-                // Enable scroll
-                textPanel.style.overflowY = "auto";
-                toggleScrollBtn.textContent = "Disable Scroll";
-                toggleScrollBtn.setAttribute("aria-pressed", "true");
-            }
-        });
-
-        // Initialize scroll enabled
-        textPanel.style.overflowY = "auto";
+       
     </script>
 </body>
 
