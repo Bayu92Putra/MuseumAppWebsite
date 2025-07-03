@@ -128,22 +128,7 @@
 
             <div id="textPanel"
                 class="scrollable-text text-slate-300 leading-relaxed overflow-y-auto pr-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <p>
-                    It should come as no surprise that the most famous painting in the world is that mysterious woman with the enigmatic smile. But that's one of the few certainties about this work of art.
-                </p>
-                <p class="mt-4">
-                    The sitter in the painting is thought to be Lisa Gherardini, the wife of Florence merchant Francesco del Giocondo, but experts aren't sure. It did represent an innovation in art — the painting is the earliest known Italian portrait to focus so closely on the sitter in a half-length portrait, according to the Louvre, where it was first installed in 1804.
-                </p>
-                <p class="mt-4">
-                    Her gaze seems to follow the viewer and her subtle smile has captivated audiences for centuries. The painting was created by Leonardo da Vinci, a polymath of the Italian Renaissance whose talents spanned art, science, and engineering.
-                </p>
-                <p class="mt-4">
-                    The Mona Lisa's techniques of sfumato—soft blending of colors and tones—enhance the lifelike quality and atmospheric depth of the portrait. Her timeless beauty and mystery continue to inspire admiration and scholarly research to this day.
-                </p>
-                <p class="mt-4">
-                    Displayed in the Louvre Museum in Paris, it attracts millions of visitors every year, making it one of the most viewed and celebrated works of art in history.
-                </p>
-
+             
             </div>
 
             </div>
@@ -358,8 +343,17 @@
                 openAudioInfo("audio2");
             }
         });
+      // Load external text file into textPanel
+fetch('assets/text_jalinanHarapanBangsa.txt')  // Ganti nama file sesuai file kamu
+    .then(response => response.text())
+    .then(text => {
+        const textPanel = document.getElementById('textPanel');
+        textPanel.innerText = text;
+    })
+    .catch(error => {
+        console.error('Error loading text:', error);
+    });
 
-       
     </script>
 </body>
 
